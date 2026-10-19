@@ -6,13 +6,18 @@ import android.content.pm.PackageManager
 import android.media.tv.TvContract
 import android.media.tv.TvInputInfo
 import android.media.tv.TvInputManager
+import android.provider.Settings
 
 /** Reads installed apps and TV inputs. Slow on TV hardware, so call it off the main thread. */
 class TileLoader(private val context: Context) {
     private val pm: PackageManager = context.packageManager
 
     fun apps(): List<Tile> {
-        val seen = mutableSetOf<String>()
+        // The Settings app already has its own tile in the TV section.
+        val settingsPkg = pm.resolveActivity(Intent(Settings.ACTION_SETTINGS), 0)?.activityInfo?.packageName
+        val seen = mutableSetOf<String>(context.packageName)
+        settingsPkg?.let { seen += it }
+        seen += HIDDEN_PACKAGES
         val tiles = mutableListOf<Tile>()
         // TV apps first, then phone-style apps that have no TV entry point.
         for (category in listOf(Intent.CATEGORY_LEANBACK_LAUNCHER, Intent.CATEGORY_LAUNCHER)) {
@@ -20,7 +25,7 @@ class TileLoader(private val context: Context) {
             for (info in pm.queryIntentActivities(query, 0)) {
                 val activity = info.activityInfo
                 val pkg = activity.packageName
-                if (pkg == context.packageName || !seen.add(pkg)) continue
+                if (!seen.add(pkg)) continue
                 val intent = Intent(Intent.ACTION_MAIN)
                     .addCategory(category)
                     .setClassName(pkg, activity.name)
@@ -65,5 +70,12 @@ class TileLoader(private val context: Context) {
             // Some firmware restricts the input list; the launcher still works without it.
             emptyList()
         }
+    }
+
+    private companion object {
+        /** Background helpers that list themselves as apps but aren't anything to open. */
+        val HIDDEN_PACKAGES = setOf(
+            "com.google.android.tv.remote.service",
+        )
     }
 }
