@@ -54,15 +54,13 @@ class TileAdapter(
             if (tile.banner != null) {
                 banner.setImageDrawable(tile.banner)
                 banner.setPadding(0, 0, 0, 0)
-                label.visibility = View.GONE
             } else {
-                // No banner: show the icon small in the middle of the tile, with the name under it.
+                // No banner: show the icon small in the middle of the tile.
                 banner.setImageDrawable(tile.icon)
                 val pad = itemView.resources.displayMetrics.density * 20
                 banner.setPadding(0, pad.toInt(), 0, pad.toInt())
-                label.visibility = View.VISIBLE
-                label.text = tile.label
             }
+            label.text = tile.label
             itemView.contentDescription = tile.label
             itemView.setOnClickListener { onClick(tile) }
             itemView.setOnLongClickListener { onLongClick(tile); true }
