@@ -48,6 +48,24 @@ To undo:
 scripts/switch-to-stock.sh <tv-ip>
 ```
 
+## Kid remote (phone or tablet)
+
+The TV app also serves a simple remote page on your home Wi-Fi. It has big picture buttons that each open
+a specific show, plus one pause/play button. There's no pairing and no Google account involved.
+
+1. On the TV, select the **Phone remote** tile to see the address (for example `http://192.168.1.20:8766` for the
+   test build; the home build uses port `8765`).
+2. Open it on a phone or tablet on the same Wi-Fi, then use the browser's **Add to Home screen**.
+3. Hold the gear in the bottom corner for 2 seconds to add shows. Paste a share link from the Prime Video,
+   Netflix or YouTube app, and select **Get name and picture**.
+4. Run this one-time setup so show buttons also work while something is already playing (Android 10 blocks this by default):
+
+   ```sh
+   scripts/enable-kid-remote.sh <tv-ip> test   # or: home
+   ```
+
+Anyone on your Wi-Fi can open the page, so it's only meant for a home network.
+
 ## Building locally
 
 Use Android Studio, or run `./gradlew assemblePreviewRelease assembleHomeRelease` with the Android SDK installed.

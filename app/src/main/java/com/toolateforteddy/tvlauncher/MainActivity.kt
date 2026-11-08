@@ -8,6 +8,7 @@ import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
 import android.net.Uri
+import android.os.Build
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
@@ -54,6 +55,8 @@ class MainActivity : Activity() {
                     if (adapter.rows.getOrNull(position) is Header) COLUMNS else 1
             }
         }
+
+        RemoteService.start(this)
 
         registerReceiver(packageReceiver, IntentFilter().apply {
             addAction(Intent.ACTION_PACKAGE_ADDED)
@@ -121,6 +124,15 @@ class MainActivity : Activity() {
             isApp = false,
         )
 
+        val phoneRemote = Tile(
+            key = "phone_remote",
+            label = getString(R.string.phone_remote),
+            banner = null,
+            icon = getDrawable(R.drawable.ic_phone_remote),
+            intent = Intent(),
+            isApp = false,
+        )
+
         val rows = mutableListOf<Row>()
         if (favoriteTiles.isNotEmpty()) {
             rows += Header(getString(R.string.section_favorites))
@@ -130,6 +142,7 @@ class MainActivity : Activity() {
         rows += apps
         rows += Header(getString(R.string.section_tv))
         rows += inputs
+        rows += phoneRemote
         rows += settings
         adapter.rows = rows
     }
@@ -142,6 +155,7 @@ class MainActivity : Activity() {
     }
 
     private fun launch(tile: Tile) {
+        if (tile.key == "phone_remote") return showPhoneRemoteHelp()
         try {
             startActivity(tile.intent)
         } catch (e: ActivityNotFoundException) {
@@ -151,8 +165,22 @@ class MainActivity : Activity() {
         }
     }
 
+    private fun showPhoneRemoteHelp() {
+        val address = RemoteService.address(this)
+        var message = if (address == null) getString(R.string.phone_remote_no_network)
+        else getString(R.string.phone_remote_help, address)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q && !Settings.canDrawOverlays(this)) {
+            message += getString(R.string.phone_remote_needs_permission)
+        }
+        AlertDialog.Builder(this)
+            .setTitle(R.string.phone_remote)
+            .setMessage(message)
+            .setPositiveButton(android.R.string.ok, null)
+            .show()
+    }
+
     private fun showOptions(tile: Tile) {
-        if (tile.key == "settings") return
+        if (tile.key == "settings" || tile.key == "phone_remote") return
         val isFavorite = favorites.contains(tile.key)
         val options = mutableListOf<Pair<String, () -> Unit>>()
         if (isFavorite) {
