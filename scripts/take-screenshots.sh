@@ -24,3 +24,20 @@ shot 03-with-favorite
 # Scroll down to the TV inputs and Settings.
 key KEYCODE_DPAD_DOWN KEYCODE_DPAD_DOWN KEYCODE_DPAD_DOWN KEYCODE_DPAD_DOWN
 shot 04-bottom
+
+# Kid remote: talk to the TV app the way the phone page does.
+adb shell appops set "$PKG" SYSTEM_ALERT_WINDOW allow
+adb forward tcp:8766 tcp:8766
+API=http://localhost:8766
+curl -fsS "$API/" > /dev/null
+curl -fsS -X PUT "$API/api/shows" -H 'Content-Type: application/json' \
+  -d '[{"name":"Test video","link":"https://www.youtube.com/watch?v=jNQXAC9IVRw","image":""}]' | tee shows.json
+ID=$(sed -E 's/.*"id":"([^"]+)".*/\1/' shows.json)
+
+# Leave our app for the stock home screen, so this also checks opening a show from the background.
+key KEYCODE_HOME
+sleep 3
+curl -fsS -X POST "$API/api/play?id=$ID"
+shot 05-remote-opened-show
+curl -fsS -X POST "$API/api/key?k=playpause"
+echo "kid remote checks passed"

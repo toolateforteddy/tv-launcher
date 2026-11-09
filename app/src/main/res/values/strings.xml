@@ -10,4 +10,9 @@
     <string name="move_right">Move right</string>
     <string name="app_info">App info</string>
     <string name="cannot_open">Couldn\'t open %1$s</string>
+    <string name="remote_channel">Kid remote</string>
+    <string name="phone_remote">Phone remote</string>
+    <string name="phone_remote_help">On a phone or tablet on the same Wi-Fi, open:\n\n%1$s\n\nThen use your browser\'s \"Add to Home screen\" so it opens like an app.</string>
+    <string name="phone_remote_no_network">The TV isn\'t on a network right now.</string>
+    <string name="phone_remote_needs_permission">\n\nShow buttons will only work while this screen is showing until the one-time setup (scripts/enable-kid-remote.sh) is run from a computer.</string>
 </resources>

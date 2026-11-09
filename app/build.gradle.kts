@@ -11,8 +11,8 @@ android {
         applicationId = "com.toolateforteddy.tvlauncher"
         minSdk = 26
         targetSdk = 35
-        versionCode = 1
-        versionName = "0.1.0"
+        versionCode = 2
+        versionName = "0.2.0"
     }
 
     // A fixed key checked into the repo so every build (local or CI) can
@@ -35,10 +35,13 @@ android {
             applicationIdSuffix = ".preview"
             versionNameSuffix = "-preview"
             resValue("string", "app_name", "Home (test)")
+            // Different port so the test and home builds can run side by side.
+            buildConfigField("int", "REMOTE_PORT", "8766")
         }
         create("home") {
             dimension = "mode"
             resValue("string", "app_name", "Home")
+            buildConfigField("int", "REMOTE_PORT", "8765")
         }
     }
 

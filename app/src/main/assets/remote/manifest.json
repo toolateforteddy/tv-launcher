@@ -1,0 +1,9 @@
+{
+  "name": "TV Remote",
+  "short_name": "TV Remote",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#14161a",
+  "theme_color": "#14161a",
+  "start_url": "/"
+}
