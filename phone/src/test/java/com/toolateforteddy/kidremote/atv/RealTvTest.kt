@@ -21,6 +21,7 @@ class RealTvTest {
 
     @Test fun pairAndControl() {
         assumeTrue(System.getenv("ATV_E2E") == "1")
+        System.setProperty("javax.net.debug", "ssl:handshake")
         val phone = ClientIdentity.generate()
 
         Pairing(host, phone, clientName = "Kid Remote").use { pairing ->
@@ -30,6 +31,7 @@ class RealTvTest {
             println("TV shows code $code")
             pairing.finish(code)
         }
+        screenshot("06b-tv-after-pairing")
 
         val session = connectWithRetries(phone)
         println("Connected to '${session.tvName}', screen on: ${session.screenOn}")
