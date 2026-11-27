@@ -24,8 +24,8 @@ jobs:
 
       - uses: gradle/actions/setup-gradle@v4
 
-      - name: Build test APK
-        run: ./gradlew --no-daemon assemblePreviewRelease
+      - name: Build test APK and phone remote
+        run: ./gradlew --no-daemon assemblePreviewRelease :phone:assembleRelease :phone:compileDebugUnitTestKotlin
 
       - name: Enable KVM
         run: |
@@ -42,7 +42,18 @@ jobs:
           profile: tv_1080p
           disable-animations: false
           emulator-options: -no-window -gpu swiftshader_indirect -no-snapshot -noaudio -no-boot-anim
-          script: scripts/take-screenshots.sh
+          script: |
+            scripts/take-screenshots.sh
+            scripts/check-phone-remote.sh || echo "::warning::Phone remote check against the TV emulator failed"
+
+      - name: Phone remote on a phone emulator
+        uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: 30
+          arch: x86_64
+          profile: pixel_5
+          emulator-options: -no-window -gpu swiftshader_indirect -no-snapshot -noaudio -no-boot-anim
+          script: scripts/take-phone-screenshots.sh
 
       - uses: actions/upload-artifact@v4
         with:

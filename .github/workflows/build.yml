@@ -22,14 +22,18 @@ jobs:
 
       - uses: gradle/actions/setup-gradle@v4
 
-      - name: Build test and home APKs
-        run: ./gradlew --no-daemon assemblePreviewRelease assembleHomeRelease
+      - name: Build test and home APKs, and the phone remote
+        run: ./gradlew --no-daemon assemblePreviewRelease assembleHomeRelease :phone:assembleRelease
+
+      - name: Phone remote tests
+        run: ./gradlew --no-daemon :phone:testDebugUnitTest
 
       - name: Collect APKs
         run: |
           mkdir -p out
           cp app/build/outputs/apk/preview/release/app-preview-release.apk out/tv-launcher-test.apk
           cp app/build/outputs/apk/home/release/app-home-release.apk out/tv-launcher-home.apk
+          cp phone/build/outputs/apk/release/phone-release.apk out/kid-remote-phone.apk
 
       - uses: actions/upload-artifact@v4
         with:
