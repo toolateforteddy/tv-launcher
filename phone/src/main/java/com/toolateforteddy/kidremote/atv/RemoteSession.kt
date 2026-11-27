@@ -43,13 +43,17 @@ class RemoteSession(
         try {
             s.connect(InetSocketAddress(host, port), CONNECT_TIMEOUT_MS)
             s.soTimeout = READ_TIMEOUT_MS
-            s.startHandshake()
-        } catch (e: SSLException) {
-            close()
-            throw NotPairedException(e)
         } catch (e: IOException) {
             close()
             throw e
+        }
+        try {
+            s.startHandshake()
+        } catch (e: IOException) {
+            // The TV is there but turned down our certificate. Depending on timing this
+            // shows up as a TLS alert or as a reset connection.
+            close()
+            throw if (e is SSLException || e is java.net.SocketException) NotPairedException(e) else e
         }
         val reader = Thread({ readLoop(s) }, "tv-remote-reader").apply { isDaemon = true }
         reader.start()
