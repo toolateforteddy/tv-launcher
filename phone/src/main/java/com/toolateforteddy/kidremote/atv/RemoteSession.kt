@@ -20,6 +20,8 @@ class RemoteSession(
     private val identity: ClientIdentity,
     private val listener: Listener,
     private val port: Int = REMOTE_PORT,
+    /** Restricts TLS versions, for trying out what a TV accepts. Null means the platform default. */
+    private val tlsProtocols: Array<String>? = null,
 ) : Closeable {
 
     interface Listener {
@@ -39,6 +41,7 @@ class RemoteSession(
     /** Connects and waits until the TV says it's ready. */
     fun connect() {
         val s = identity.sslContext().socketFactory.createSocket() as SSLSocket
+        tlsProtocols?.let { s.enabledProtocols = it }
         socket = s
         try {
             s.connect(InetSocketAddress(host, port), CONNECT_TIMEOUT_MS)

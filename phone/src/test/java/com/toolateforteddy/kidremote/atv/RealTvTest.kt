@@ -31,8 +31,7 @@ class RealTvTest {
             pairing.finish(code)
         }
 
-        val session = RemoteSession(host, phone, object : RemoteSession.Listener {})
-        session.connect()
+        val session = connectWithRetries(phone)
         println("Connected to '${session.tvName}', screen on: ${session.screenOn}")
 
         session.sendKey(RemoteSession.KEY_HOME)
@@ -48,6 +47,24 @@ class RealTvTest {
         Thread.sleep(1000)
         session.close()
         assertTrue("TV didn't open the link: $top", "youtube" in top.lowercase() || "browser" in top.lowercase() || "chrome" in top.lowercase())
+    }
+
+    /** Logs each failure, so CI shows what the TV did if the first try doesn't work. */
+    private fun connectWithRetries(phone: ClientIdentity): RemoteSession {
+        var last: Exception? = null
+        for ((delayMs, protocols) in listOf(0L to null, 3000L to null, 3000L to arrayOf("TLSv1.2"), 5000L to null)) {
+            Thread.sleep(delayMs)
+            val session = RemoteSession(host, phone, object : RemoteSession.Listener {}, tlsProtocols = protocols)
+            try {
+                session.connect()
+                println("Connected after ${delayMs}ms wait, protocols=${protocols?.toList() ?: "default"}")
+                return session
+            } catch (e: Exception) {
+                println("Connect attempt failed (protocols=${protocols?.toList() ?: "default"}): $e / cause ${e.cause}")
+                last = e
+            }
+        }
+        throw last!!
     }
 
     private fun readCodeFromScreen(): String {

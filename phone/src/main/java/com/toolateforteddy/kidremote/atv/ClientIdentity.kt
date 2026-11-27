@@ -79,6 +79,11 @@ class ClientIdentity(val privateKey: PrivateKey, val certificate: X509Certificat
                 0x30,
                 oid("2.5.29.19") + der(0x04, der(0x30, byteArrayOf(0x01, 0x01, 0xff.toByte(), 0x02, 0x01, 0x00))),
             )
+            // Subject alternative name, also as those libraries do.
+            val subjectAltName = der(
+                0x30,
+                oid("2.5.29.17") + der(0x04, der(0x30, der(0x82, commonName.toByteArray()))),
+            )
             val serial = BigInteger(63, SecureRandom()).add(BigInteger.ONE)
             val tbs = der(
                 0x30,
@@ -89,7 +94,7 @@ class ClientIdentity(val privateKey: PrivateKey, val certificate: X509Certificat
                     der(0x30, time(notBefore) + time(notAfter)) +
                     name +
                     keyPair.public.encoded +
-                    der(0xa3, der(0x30, basicConstraints)),
+                    der(0xa3, der(0x30, basicConstraints + subjectAltName)),
             )
             val signature = Signature.getInstance("SHA256withRSA").run {
                 initSign(keyPair.private)
